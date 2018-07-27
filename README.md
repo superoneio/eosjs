@@ -1,19 +1,50 @@
 [![Build Status](https://travis-ci.org/EOSIO/eosjs.svg?branch=master)](https://travis-ci.org/EOSIO/eosjs)
 [![NPM](https://img.shields.io/npm/v/eosjs.svg)](https://www.npmjs.org/package/eosjs)
 
-| [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](/EOSIO/eos) | [Docker Hub](https://hub.docker.com/r/eosio/eos/) |
-| --- | --- | --- | --- |
-| tag: 14.x.x | `npm install eosjs` (version 14) | tag: v1.0.1 | eosio/eos:v1.0.1 |
-| tag: 13.x.x | `npm install eosjs` (version 13) | tag: dawn-v4.2.0 | eosio/eos:20180526 |
-| tag: 12.x.x | `npm install eosjs` (version 12) | tag: dawn-v4.1.0 | eosio/eos:20180519 |
-| tag: 11.x.x | `npm install eosjs@dawn4` (version 11) | tag: dawn-v4.0.0 | eosio/eos:dawn-v4.0.0 |
-| tag: 9.x.x | `npm install eosjs@dawn3` (version 9) | tag: DAWN-2018-04-23-ALPHA | eosio/eos:DAWN-2018-04-23-ALPHA | [local docker](https://github.com/EOSIO/eosjs/tree/DAWN-2018-04-23-ALPHA/docker) |
-| tag: 8.x.x | `npm install eosjs@8` (version 8) | tag: dawn-v3.0.0 | eosio/eos:dawn3x |
-| branch: dawn2 | `npm install eosjs` | branch: dawn-2.x | eosio/eos:dawn2x |
-
 # Eosjs
 
 General purpose library for EOSIO blockchains.
+
+### Versions
+
+| [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](https://github.com/EOSIO/eos) | [Docker Hub](https://hub.docker.com/r/eosio/eos/) |
+| --- | --- | --- | --- |
+| tag: 16.0.0 | `npm install eosjs` | tag: v1.1.0 | eosio/eos:v1.1.0 |
+
+Prior [version](./docs/prior_versions.md) matrix.
+
+### Usage
+
+* Install with: `npm install eosjs`
+* Html script tag, see [releases](https://github.com/EOSIO/eosjs/releases) for the correct **version** and its matching script **integrity** hash.
+
+```html
+<!--
+sha512-WVarvM+kg5FyfhRnQH8ZjSswAaUctdOxvsXCXWWwfpV7/vb3Phy5KB3rjKwV8h3+9evInAsyLnxvDsdD+Fd6BA== lib/eos.js
+sha512-vNyLnOEb7uFmEtVbLnyZQ9/k4zckM2Vu3jJOKq6XfWEVZG0yKcjDExVN4EQ7e3F+rePWRncMolI2xFi/3qo62A== lib/eos.min.js
+sha512-ZhiO8AyYgrZOyDo3y40LVg1YkjqjUr9hYO+te8IYHU1gfAmyZxfut9CQj73+mEgC9u7GV2Gttr3cxTh7QH0rkw== lib/eos.min.js.map
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+
+  <script src="https://cdn.jsdelivr.net/npm/eosjs@16.0.0/lib/eos.min.js"
+    integrity="sha512-vNyLnOEb7uFmEtVbLnyZQ9/k4zckM2Vu3jJOKq6XfWEVZG0yKcjDExVN4EQ7e3F+rePWRncMolI2xFi/3qo62A=="
+    crossorigin="anonymous"></script>
+
+  <script>
+  eos = Eos({
+    httpEndpoint: 'http://ayeaye.cypherglass.com:8888',
+    chainId: '038f4b0fc8ff18a4f0842a8f0564611f6e96e8535901dd45e43ac8691a1c4dca',
+    verbose: true
+  })
+  </script>
+</head>
+<body>
+  See console object: Eos
+</body>
+</html>
+```
 
 ### Usage
 
@@ -26,9 +57,14 @@ Eos = require('eosjs')
 // For multiple keys, the get_required_keys API is used (more on that below).
 keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
 
-eos = Eos({keyProvider}) // Localhost Testnet (run ./docker/up.sh)
+// Localhost Testnet (run ./docker/up.sh)
+eos = Eos({keyProvider})
 
-eos = Eos({httpEndpoint, chainId, keyProvider}) // Any other chain
+// Connect to a testnet or mainnet
+eos = Eos({httpEndpoint, chainId, keyProvider})
+
+// Cold-storage
+eos = Eos({httpEndpoint: null, chainId, keyProvider})
 
 // Read-only instance when 'eosjs' is already a dependency
 eos = Eos.modules.api({/*config*/})
@@ -54,13 +90,13 @@ PARAMETERS
 ```
 
 Start a nodeosd process.  The docker in this repository provides a setup
-the supports the examples in this README.
+that supports the examples in this README.
 
 ```bash
 cd ./docker && ./up.sh
 ```
 
-All functions read only or transactional follow this pattern for parameters.
+All blockchain functions (read and write) follow this pattern:
 
 ```js
 // If the last argument is a function it is treated as a callback
@@ -77,37 +113,32 @@ eos.getInfo({}) // @returns {Promise}
 eos.getInfo((error, result) => { console.log(error, result) })
 ```
 
+### API Documentation
+
 Chain and history API functions are available after creating the `eos` object.
-API methods and documentation are generated from the chain and history json files.
 
-* [chain.json](https://github.com/EOSIO/eosjs-api/blob/master/src/api/v1/chain.json)
-* [history.json](https://github.com/EOSIO/eosjs-api/blob/master/src/api/v1/history.json)
-
-Until we generate a markdown for these, please convert the names in these
-json to camel case functions.
-
-* `"get_info": ..` is `eos.getInfo(..)`
+* [API](https://github.com/EOSIO/eosjs-api/blob/master/docs/api.md#eos--object)
 
 ### Configuration
 
 ```js
 Eos = require('eosjs')
 
-// Default configuration
+// Default configuration (additional options below)
 config = {
   chainId: null, // 32 byte (64 char) hex string
   keyProvider: ['PrivateKeys...'], // WIF string or array of keys..
   httpEndpoint: 'http://127.0.0.1:8888',
   expireInSeconds: 60,
   broadcast: true,
-  debug: false, // API and transaction binary
+  verbose: false, // API activity
   sign: true
 }
 
 eos = Eos(config)
 ```
 
-* **chainId** `hex` - Unique ID for the blockchain you're connecting too.  This
+* **chainId** `hex` - Unique ID for the blockchain you're connecting to.  This
   is required for valid transaction signing.  The chainId is provided via the
   [get_info](http://ayeaye.cypherglass.com:8888/v1/chain/get_info) API call.
 
@@ -125,6 +156,8 @@ eos = Eos(config)
   the same origin policy in nodeosd or proxy server.  For testing, nodeosd
   configuration `access-control-allow-origin = *` could be used.
 
+  Set this value to **null** for a cold-storage (no network) configuration.
+
 * **expireInSeconds** `number` - number of seconds before the transaction
   will expire.  The time is based on the nodeosd's clock.  An unexpired
   transaction that may have had an error is a liability until the expiration
@@ -133,8 +166,9 @@ eos = Eos(config)
 * **broadcast** `[boolean=true]` - post the transaction to
   the blockchain.  Use false to obtain a fully signed transaction.
 
-* **debug** `[boolean=false]` - console log additional information when getting
-  unusual errors.
+* **verbose** `[boolean=false]` - verbose logging such as API activity.
+
+* **debug** `[boolean=false]` - low level debug logging (serialization).
 
 * **sign** `[boolean=true]` - sign the transaction with a private key.  Leaving
   a transaction unsigned avoids the need to provide a private key.
@@ -151,6 +185,16 @@ eos = Eos(config)
   every transaction. Headers are documented here [eosjs-api#headers](https://github.com/EOSIO/eosjs-api/blob/HEAD/docs/index.md#headers--object).
   * `transactionHeaders: (expireInSeconds, callback) => {callback(null/*error*/, headers)}`
 
+* **logger** - default logging configuration.
+  ```js
+  logger: {
+    log: config.verbose ? console.log : null,
+    error: console.error // null to disable
+  }
+  ```
+
+  Turn off all error logging: `config.logger = {error: null}`
+
 ### Options
 
 Options may be provided after parameters.
@@ -164,7 +208,7 @@ options = {
 ```
 
 ```js
-eos.transfer('alice', 'bob', '1 SYS', '', options)
+eos.transfer('alice', 'bob', '1.0000 SYS', '', options)
 ```
 
 * **authorization** `[array<auth>|auth]` - identifies the
@@ -187,29 +231,46 @@ eos.transfer('alice', 'bob', '1 SYS', '', options)
 
 ### Transaction
 
-The transaction function accepts the standard blockchain transaction. Required
-transaction header fields will be added.
+The transaction function accepts the standard blockchain transaction.
+
+Required transaction header fields will be added unless you are signing without a
+network connection (httpEndpoint == null). In that case provide you own headers:
+
+```js
+// only needed in cold-storage or for offline transactions
+const headers = {
+  expiration: '2018-06-14T18:16:10'
+  ref_block_num: 1,
+  ref_block_prefix: 452435776
+}
+```
+
+Create and send (broadcast) a transaction:
 
 ```javascript
 /** @return {Promise} */
-eos.transaction({
-  actions: [
-    {
-      account: 'eosio.token',
-      name: 'transfer',
-      authorization: [{
-        actor: 'inita',
-        permission: 'active'
-      }],
-      data: {
-        from: 'inita',
-        to: 'initb',
-        quantity: '7 SYS',
-        memo: ''
+eos.transaction(
+  {
+    // ...headers,
+    actions: [
+      {
+        account: 'eosio.token',
+        name: 'transfer',
+        authorization: [{
+          actor: 'inita',
+          permission: 'active'
+        }],
+        data: {
+          from: 'inita',
+          to: 'initb',
+          quantity: '7.0000 SYS',
+          memo: ''
+        }
       }
-    }
-  ]
-}) // `options` can be a second parameter
+    ]
+  }
+  // options -- example: {broadcast: false}
+)
 ```
 
 ### Named action functions
@@ -222,25 +283,35 @@ more frequently.  This avoids having lots of JSON in the code.
 eos.transfer()
 
 // Callback is last, when omitted a promise is returned
-eos.transfer('inita', 'initb', '1 SYS', '', (error, result) => {})
-eos.transfer('inita', 'initb', '1.1 SYS', '') // @returns {Promise}
+eos.transfer('inita', 'initb', '1.0000 SYS', '', (error, result) => {})
+eos.transfer('inita', 'initb', '1.1000 SYS', '') // @returns {Promise}
 
 // positional parameters
-eos.transfer('inita', 'initb', '1.2 SYS', '')
+eos.transfer('inita', 'initb', '1.2000 SYS', '')
 
 // named parameters
-eos.transfer({from: 'inita', to: 'initb', quantity: '1.3 SYS', memo: ''})
+eos.transfer({from: 'inita', to: 'initb', quantity: '1.3000 SYS', memo: ''})
 
-// options appear after parameters but before
+// options appear after parameters
 options = {broadcast: true, sign: true}
 
 // `false` is a shortcut for {broadcast: false}
-eos.transfer('inita', 'initb', '1.4 SYS', '', false)
+eos.transfer('inita', 'initb', '1.4000 SYS', '', false)
 ```
 
 Read-write API methods and documentation are generated from the eosio
 [token](https://github.com/EOSIO/eosjs/blob/master/src/schema/eosio_token.json) and
 [system](https://github.com/EOSIO/eosjs/blob/master/src/schema/eosio_system.json).
+
+Assets amounts require zero padding.  For a better user-experience, if you know
+the correct precision you may use DecimalPad to add the padding.
+
+```js
+DecimalPad = Eos.modules.format.DecimalPad
+userInput = '10.2'
+precision = 4
+assert.equal('10.2000', DecimalPad(userInput, precision))
+```
 
 For more advanced signing, see `keyProvider` and `signProvider` in
 [index.test.js](https://github.com/EOSIO/eosjs/blob/master/src/index.test.js).
@@ -248,13 +319,13 @@ For more advanced signing, see `keyProvider` and `signProvider` in
 ### Shorthand
 
 Shorthand is available for some types such as Asset and Authority.  This syntax
-is only for concise functions and does not work in `eos.transaction`.
+is only for concise functions and does not work when providing entire transaction
+objects to `eos.transaction`..
 
 For example:
-* asset `'10 SYS'` resolves `10.0000 SYS`
 * permission `inita` defaults `inita@active`
-* authority `'EOS6MRy..'` expands `{threshold: 1, keys: [key: 'EOS6MRy..', weight: 1]}`
-* authority `inita` expands `{{threshold: 1, accounts: [..actor: 'inita', permission: 'active', weight: 1]}}`
+* authority `'EOS6MRy..'` expands `{threshold: 1, keys: [{key: 'EOS6MRy..', weight: 1}]}`
+* authority `inita` expands `{threshold: 1, accounts: [{permission: {actor: 'inita', permission: 'active'}, weight: 1}]}`
 
 ### New Account
 
@@ -339,30 +410,72 @@ eos.transaction(['myaccount', 'myaccount2'], ({myaccount, myaccount2}) => {
 })
 ```
 
+#### Offline or cold-storage contract
+
+```js
+eos = Eos({httpEndpoint: null})
+
+abi = fs.readFileSync(`docker/contracts/eosio.token/eosio.token.abi`)
+eos.fc.abiCache.abi('myaccount', JSON.parse(abi))
+
+// Check that the ABI is available (print usage)
+eos.contract('myaccount').then(myaccount => myaccount.create())
+```
+#### Offline or cold-storage transaction
+
+```js
+// ONLINE
+
+// Prepare headers
+expireInSeconds = 60 * 60 // 1 hour
+
+eos = Eos(/* {httpEndpoint: 'https://..'} */)
+
+info = await eos.getInfo({})
+chainDate = new Date(info.head_block_time + 'Z')
+expiration = new Date(chainDate.getTime() + expireInSeconds * 1000)
+expiration = expiration.toISOString().split('.')[0]
+
+block = await eos.getBlock(info.last_irreversible_block_num)
+
+transactionHeaders = {
+  expiration,
+  ref_block_num: info.last_irreversible_block_num & 0xFFFF,
+  ref_block_prefix: block.ref_block_prefix
+}
+
+// OFFLINE (bring `transactionHeaders`)
+
+// All keys in keyProvider will sign.
+eos = Eos({httpEndpoint: null, chainId, keyProvider, transactionHeaders})
+
+transfer = await eos.transfer('inita', 'initb', '1.0000 SYS', '')
+transferTransaction = transfer.transaction
+
+// ONLINE (bring `transferTransaction`)
+
+eos = Eos(/* {httpEndpoint: 'https://..'} */)
+
+processedTransaction = await eos.pushTransaction(transferTransaction)
+```
+
 #### Custom Token
 
 ```js
-(async function() {
+// more on the contract / transaction syntax
 
-  // more on the contract / transaction syntax below
+await eos.transaction('myaccount', myaccount => {
 
-  await eos.transaction('myaccount', myaccount => {
+  // Create the initial token with its max supply
+  // const options = {authorization: 'myaccount'} // default
+  myaccount.create('myaccount', '10000000.000 TOK')//, options)
 
-    // Create the initial token with its max supply
-    // const options = {authorization: 'myaccount'} // default
-    myaccount.create('myaccount', '10000000.000 TOK')//, options)
+  // Issue some of the max supply for circulation into an arbitrary account
+  myaccount.issue('myaccount', '10000.000 TOK', 'issue')
+})
 
-    // NOTE: the TOK@myaccount behavior is being defined and
-    // may change in a future "major" eosjs version release.
-
-    // Issue some of the max supply for circulation into an arbitrary account
-    myaccount.issue('myaccount', '10000.000 TOK', 'issue')
-  })
-
-  const balance = await eos.getCurrencyBalance('myaccount', 'myaccount', 'TOK')
-  console.log('Currency Balance', balance)
-
-})()
+const balance = await eos.getCurrencyBalance('myaccount', 'myaccount', 'TOK')
+console.log('Currency Balance', balance)
 ```
 
 ### Calling Actions
@@ -370,45 +483,38 @@ eos.transaction(['myaccount', 'myaccount2'], ({myaccount, myaccount2}) => {
 Other ways to use contracts and transactions.
 
 ```javascript
-(async function() {
+// if either transfer fails, both will fail (1 transaction, 2 messages)
+await eos.transaction(eos =>
+  {
+    eos.transfer('inita', 'initb', '1.0000 SYS', ''/*memo*/)
+    eos.transfer('inita', 'initc', '1.0000 SYS', ''/*memo*/)
+    // Returning a promise is optional (but handled as expected)
+  }
+  // [options],
+  // [callback]
+)
 
-  // if either transfer fails, both will fail (1 transaction, 2 messages)
-  await eos.transaction(eos =>
-    {
-      eos.transfer('inita', 'initb', '1 SYS', ''/*memo*/)
-      eos.transfer('inita', 'initc', '1 SYS', ''/*memo*/)
-      // Returning a promise is optional (but handled as expected)
-    }
-    // [options],
-    // [callback]
-  )
+// transaction on a single contract
+await eos.transaction('myaccount', myaccount => {
+  myaccount.transfer('myaccount', 'inita', '10.000 TOK@myaccount', '')
+})
 
-  // NOTE: the TOK@myaccount behavior is being defined and
-  // may change in a future "major" eosjs version release.
+// mix contracts in the same transaction
+await eos.transaction(['myaccount', 'eosio.token'], ({myaccount, eosio_token}) => {
+  myaccount.transfer('inita', 'initb', '1.000 TOK@myaccount', '')
+  eosio_token.transfer('inita', 'initb', '1.0000 SYS', '')
+})
 
-  // transaction on a single contract
-  await eos.transaction('myaccount', myaccount => {
-    myaccount.transfer('myaccount', 'inita', '10 TOK@myaccount', '')
-  })
+// The contract method does not take an array so must be called once for
+// each contract that is needed.
+const myaccount = await eos.contract('myaccount')
+await myaccount.transfer('myaccount', 'inita', '1.000 TOK', '')
 
-  // mix contracts in the same transaction
-  await eos.transaction(['myaccount', 'eosio.token'], ({myaccount, eosio_token}) => {
-    myaccount.transfer('inita', 'initb', '1 TOK@myaccount', '')
-    eosio_token.transfer('inita', 'initb', '1 SYS', '')
-  })
-
-  // The contract method does not take an array so must be called once for
-  // each contract that is needed.
-  const myaccount = await eos.contract('myaccount')
-  await myaccount.transfer('myaccount', 'inita', '1.000 TOK', '')
-
-  // a transaction to a contract instance can specify multiple actions
-  await myaccount.transaction(myaccountTr => {
-    myaccountTr.transfer('inita', 'initb', '1.000 TOK', '')
-    myaccountTr.transfer('initb', 'inita', '1.000 TOK', '')
-  })
-
-})()
+// a transaction to a contract instance can specify multiple actions
+await myaccount.transaction(myaccountTr => {
+  myaccountTr.transfer('inita', 'initb', '1.000 TOK', '')
+  myaccountTr.transfer('initb', 'inita', '1.000 TOK', '')
+})
 ```
 
 # Development
@@ -425,12 +531,12 @@ import from `./src` instead.
 Eos = require('./src')
 
 // forceActionDataHex = false helps transaction readability but may trigger back-end bugs
-config = {debug: false, broadcast: true, forceActionDataHex: true, keyProvider}
+config = {verbose: true, debug: false, broadcast: true, forceActionDataHex: true, keyProvider}
 
 eos = Eos(config)
 ```
 
-* Fcbuffer
+#### Fcbuffer
 
 The `eos` instance can provide serialization:
 
@@ -448,7 +554,7 @@ eos.contract('eosio.token', (error, eosio_token) => {
 })
 ```
 
-Use Node v8+ for `package-lock.json`.
+Use Node v10+ for `package-lock.json`.
 
 # Related Libraries
 
@@ -484,28 +590,6 @@ var {format, api, ecc, json, Fcbuffer} = Eos.modules
   * Binary serialization used by the blockchain
   * Clients sign the binary form of the transaction
   * Allows client to know what it is signing
-
-
-# Browser
-
-```bash
-git clone https://github.com/EOSIO/eosjs.git
-cd eosjs
-npm install
-npm run build_browser
-# builds: ./dist/eos.js load with ./dist/index.html
-
-npm run build_browser_test
-# builds: ./dist/test.js run with ./dist/test.html
-```
-
-```html
-<script src="eos.js"></script>
-<script>
-var eos = Eos()
-//...
-</script>
-```
 
 # Environment
 

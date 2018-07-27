@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -o errexit
-set -o xtrace
-
 . ./dockrc.sh
+
+set -o xtrace
 
 # Reset the volumes
 docker-compose down
@@ -15,7 +15,9 @@ docker-compose up -d
 docker-compose logs -f | egrep -v 'Produced block 0' &
 sleep 2
 
+
 cleos wallet create
+cleos wallet import --private-key 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
 
 # Create accounts must happen before eosio.system is installed
 

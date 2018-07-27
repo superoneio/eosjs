@@ -4,7 +4,6 @@ const Fcbuffer = require('fcbuffer')
 const ByteBuffer = require('bytebuffer')
 
 const Eos = require('.')
-const AssetCache = require('./asset-cache')
 
 describe('shorthand', () => {
 
@@ -58,29 +57,27 @@ describe('shorthand', () => {
     const eos = Eos()
     const {types} = eos.fc
     const Symbol = types.symbol()
-
     assertSerializer(Symbol, '4,SYS', '4,SYS', 'SYS')
   })
 
   it('extended_symbol', () => {
     const eos = Eos({defaults: true})
     const esType = eos.fc.types.extended_symbol()
-    const esString = esType.toObject()
-    assertSerializer(esType, esString)
+    // const esString = esType.toObject()
+    assertSerializer(esType, '4,SYS@contract')
   })
 
   it('asset', () => {
     const eos = Eos()
     const {types} = eos.fc
-    const AssetType = types.asset()
-    assertSerializer(AssetType, '1.1 4,SYS@eosio.token', '1.1000 SYS@eosio.token', '1.1000 SYS')
+    const aType = types.asset()
+    assertSerializer(aType, '1.0001 SYS')
   })
 
   it('extended_asset', () => {
     const eos = Eos({defaults: true})
     const eaType = eos.fc.types.extended_asset()
-    const eaObject = eaType.fromObject('1.0000 4,SYS@eosio.token')
-    assertSerializer(eaType, eaObject)
+    assertSerializer(eaType, eaType.toObject())
   })
 
   it('signature', () => {
@@ -94,23 +91,20 @@ describe('shorthand', () => {
 
 })
 
-if(process.env['NODE_ENV'] === 'development') {
+describe('Eosio Abi', () => {
 
-  describe('Eosio Abi', () => {
+  it('Eosio token contract parses', (done) => {
+    const eos = Eos()
 
-    it('Eosio token contract parses', (done) => {
-      const eos = Eos()
-
-      eos.contract('eosio.token', (error, eosio_token) => {
-        assert(!error, error)
-        assert(eosio_token.transfer, 'eosio.token contract')
-        assert(eosio_token.issue, 'eosio.token contract')
-        done()
-      })
+    eos.contract('eosio.token', (error, eosio_token) => {
+      assert(!error, error)
+      assert(eosio_token.transfer, 'eosio.token contract')
+      assert(eosio_token.issue, 'eosio.token contract')
+      done()
     })
-
   })
-}
+
+})
 
 describe('Action.data', () => {
   it('json', () => {
